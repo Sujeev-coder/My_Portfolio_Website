@@ -1,5 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    /* ================= EMAILJS INITIALIZATION ================= */
+    // Initialize EmailJS with your Public Key
+    // Get your Public Key from: https://dashboard.emailjs.com/admin/account
+    try {
+        emailjs.init("bbnvfiQ3aHZOfRXKo"); // Replace with your actual Public Key
+    } catch (error) {
+        console.warn("EmailJS not initialized yet. Please add your Public Key.");
+    }
+
     /* ================= CUSTOM CURSOR ================= */
     const cursorDot = document.querySelector(".cursor-dot");
     const cursorOutline = document.querySelector(".cursor-outline");
@@ -153,11 +162,11 @@ document.addEventListener("DOMContentLoaded", () => {
         glows[1].style.transform = `translate(${-x}px, ${-y}px)`;
     });
 
-    /* ================= FORM VALIDATION ================= */
+    /* ================= FORM VALIDATION & EMAIL SENDING ================= */
     const form = document.getElementById("contactForm");
     const formStatus = document.querySelector(".form-status");
 
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
         e.preventDefault();
         
         const name = document.getElementById("name").value.trim();
@@ -165,26 +174,49 @@ document.addEventListener("DOMContentLoaded", () => {
         const message = document.getElementById("message").value.trim();
 
         if (name && email && message) {
-            // Simulate sending action
             const btn = form.querySelector("button");
             const originalText = btn.innerText;
             btn.innerText = "Sending...";
             btn.style.opacity = "0.7";
             btn.disabled = true;
 
-            setTimeout(() => {
-                formStatus.style.color = "#4ade80"; // Green color for success
-                formStatus.innerText = "Message sent successfully! I will get back to you soon.";
-                form.reset();
+            try {
+                // Check if EmailJS is initialized
+                if (typeof emailjs === 'undefined') {
+                    throw new Error("EmailJS is not loaded");
+                }
+
+                // Send email using EmailJS
+                const response = await emailjs.send(
+                    "service_bynggdv", // Replace with your Service ID
+                    "template_rqughfw", // Replace with your Template ID
+                    {
+                        from_name: name,
+                        from_email: email,
+                        message: message,
+                        to_email: "sujeevjohnthotakuri@gmail.com"
+                    }
+                );
+
+                if (response.status === 200) {
+                    formStatus.style.color = "#4ade80"; // Green color for success
+                    formStatus.innerText = "Message sent successfully! I will get back to you soon.";
+                    form.reset();
+                    
+                    // Clear message after 5 seconds
+                    setTimeout(() => {
+                        formStatus.innerText = "";
+                    }, 5000);
+                }
+            } catch (error) {
+                console.error("Error sending email:", error);
+                formStatus.style.color = "#f87171"; // Red color for error
+                formStatus.innerText = "Note: Email service not configured yet. Please contact via social links above.";
+            } finally {
                 btn.innerText = originalText;
                 btn.style.opacity = "1";
                 btn.disabled = false;
-                
-                // Clear message after 5 seconds
-                setTimeout(() => {
-                    formStatus.innerText = "";
-                }, 5000);
-            }, 1500);
+            }
         } else {
             formStatus.style.color = "#f87171"; // Red color for error
             formStatus.innerText = "Please fill in all fields.";
