@@ -1,13 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
+    const CONTACT_EMAIL = "sujeevjohnthotakuri@gmail.com";
 
-    /* ================= EMAILJS INITIALIZATION ================= */
-    // Initialize EmailJS with your Public Key
-    // Get your Public Key from: https://dashboard.emailjs.com/admin/account
-    try {
-        emailjs.init("bbnvfiQ3aHZOfRXKo"); // Replace with your actual Public Key
-    } catch (error) {
-        console.warn("EmailJS not initialized yet. Please add your Public Key.");
-    }
+    const openMailClient = ({ name, email, message }) => {
+        const subject = encodeURIComponent(`New portfolio inquiry from ${name}`);
+        const body = encodeURIComponent(
+            `Name: ${name}\nEmail: ${email}\n\nProject Details:\n${message}`
+        );
+
+        window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
+    };
 
     /* ================= CUSTOM CURSOR ================= */
     const cursorDot = document.querySelector(".cursor-dot");
@@ -162,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
         glows[1].style.transform = `translate(${-x}px, ${-y}px)`;
     });
 
-    /* ================= FORM VALIDATION & EMAIL SENDING ================= */
+    /* ================= FORM VALIDATION & RESEND API ================= */
     const form = document.getElementById("contactForm");
     const formStatus = document.querySelector(".form-status");
 
@@ -181,24 +182,21 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.disabled = true;
 
             try {
-                // Check if EmailJS is initialized
-                if (typeof emailjs === 'undefined') {
-                    throw new Error("EmailJS is not loaded");
+                const response = await fetch("/api/contact", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ name, email, message })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Contact API request failed");
                 }
 
-                // Send email using EmailJS
-                const response = await emailjs.send(
-                    "service_bynggdv", // Replace with your Service ID
-                    "template_rqughfw", // Replace with your Template ID
-                    {
-                        from_name: name,
-                        from_email: email,
-                        message: message,
-                        to_email: "sujeevjohnthotakuri@gmail.com"
-                    }
-                );
+                const result = await response.json();
 
-                if (response.status === 200) {
+                if (result.success) {
                     formStatus.style.color = "#4ade80"; // Green color for success
                     formStatus.innerText = "Message sent successfully! I will get back to you soon.";
                     form.reset();
@@ -210,8 +208,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             } catch (error) {
                 console.error("Error sending email:", error);
-                formStatus.style.color = "#f87171"; // Red color for error
-                formStatus.innerText = "Note: Email service not configured yet. Please contact via social links above.";
+                openMailClient({ name, email, message });
+                formStatus.style.color = "#facc15";
+                formStatus.innerText = "Email service is unavailable right now, so your mail app has been opened instead.";
             } finally {
                 btn.innerText = originalText;
                 btn.style.opacity = "1";
