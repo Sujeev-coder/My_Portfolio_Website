@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
 
     const html = `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
-            <h2 style="margin-bottom: 12px;">New Portfolio Inquiry</h2>
+            <h2 style="margin-bottom: 12px;">New Website Design Inquiry</h2>
             <p><strong>Name:</strong> ${escapeHtml(name)}</p>
             <p><strong>Email:</strong> ${escapeHtml(email)}</p>
             <p><strong>Project Details:</strong></p>
@@ -49,7 +49,7 @@ module.exports = async (req, res) => {
                 from: CONTACT_FROM_EMAIL,
                 to: [CONTACT_TO_EMAIL],
                 reply_to: email,
-                subject: `New portfolio inquiry from ${name}`,
+                subject: `New Website Design inquiry from ${name}`,
                 text: plainText,
                 html
             })
