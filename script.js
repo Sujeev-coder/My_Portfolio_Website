@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const linksAndButtons = document.querySelectorAll("a, button, input, textarea");
 
     // Only activate custom cursor if not on a touch device
-    if (window.matchMedia("(pointer: fine)").matches) {
+    if (window.matchMedia("(pointer: fine)").matches && cursorDot && cursorOutline) {
         window.addEventListener("mousemove", (e) => {
             const posX = e.clientX;
             const posY = e.clientY;
@@ -81,21 +81,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const menuToggle = document.querySelector(".menu-toggle");
     const navLinksContainer = document.querySelector(".nav-links");
 
-    menuToggle.addEventListener("click", () => {
-        navLinksContainer.classList.toggle("mobile-active");
-        const icon = menuToggle.querySelector("i");
-        if(navLinksContainer.classList.contains("mobile-active")) {
-            icon.classList.replace("ph-list", "ph-x");
-        } else {
-            icon.classList.replace("ph-x", "ph-list");
-        }
-    });
+    if (menuToggle && navLinksContainer) {
+        menuToggle.addEventListener("click", () => {
+            navLinksContainer.classList.toggle("mobile-active");
+            const icon = menuToggle.querySelector("i");
+            if(navLinksContainer.classList.contains("mobile-active")) {
+                icon.classList.replace("ph-list", "ph-x");
+            } else {
+                icon.classList.replace("ph-x", "ph-list");
+            }
+        });
+    }
 
     // Close menu when a link is clicked
     navLinks.forEach(link => {
         link.addEventListener("click", () => {
-            navLinksContainer.classList.remove("mobile-active");
-            menuToggle.querySelector("i").classList.replace("ph-x", "ph-list");
+            if (navLinksContainer && menuToggle) {
+                navLinksContainer.classList.remove("mobile-active");
+                menuToggle.querySelector("i").classList.replace("ph-x", "ph-list");
+            }
         });
     });
 
@@ -155,19 +159,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const heroSection = document.querySelector(".hero");
     const glows = document.querySelectorAll(".ambient-glow");
 
-    heroSection.addEventListener("mousemove", (e) => {
-        const x = (window.innerWidth - e.pageX * 2) / 90;
-        const y = (window.innerHeight - e.pageY * 2) / 90;
+    if (heroSection && glows.length >= 2) {
+        heroSection.addEventListener("mousemove", (e) => {
+            const x = (window.innerWidth - e.pageX * 2) / 90;
+            const y = (window.innerHeight - e.pageY * 2) / 90;
 
-        glows[0].style.transform = `translate(${x}px, ${y}px)`;
-        glows[1].style.transform = `translate(${-x}px, ${-y}px)`;
-    });
+            glows[0].style.transform = `translate(${x}px, ${y}px)`;
+            glows[1].style.transform = `translate(${-x}px, ${-y}px)`;
+        });
+    }
 
     /* ================= FORM VALIDATION & RESEND API ================= */
     const form = document.getElementById("contactForm");
     const formStatus = document.querySelector(".form-status");
 
-    form.addEventListener("submit", async (e) => {
+    if (form && formStatus) {
+        form.addEventListener("submit", async (e) => {
         e.preventDefault();
         
         const name = document.getElementById("name").value.trim();
@@ -220,6 +227,7 @@ document.addEventListener("DOMContentLoaded", () => {
             formStatus.style.color = "#f87171"; // Red color for error
             formStatus.innerText = "Please fill in all fields.";
         }
-    });
+        });
+    }
 
 });
